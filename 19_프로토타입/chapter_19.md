@@ -66,3 +66,67 @@ console.log(circle1.getArea === circle2.getArea); // true
 - Circle 생성자 함수가 생성한 모든 인스턴스는 자신의 프로토타입의 모든 프로퍼티와 메서드를 상속받는다.
 - getArea 메서드를 Circle.prototype의 메서드로 할당해 Circle 생성자 함수가 생성한 모든 인스턴스가 상속받아 사용할 수 있다.
 - radius 프로퍼티는 개별적으로 소유하고 getArea 메서드는 상속을 통해 공유하여 사용한다.
+
+## 📝 19.3 프로토타입 객체
+
+프로토타입 객체란 객체지향 프로그래밍의 근간을 이루는 객체 간 상속을 구현하기 위해 사용된다.  
+프로토타입은 어떤 객체의 상위 객체의 역할을 하는 객체로서 다른 객체에 공유 프로퍼티를 제공한다. 프로토타입을 상속받은 하위 객체는 상위 객체의 프로퍼티를 자신의 프로퍼티처럼 사용할 수 있다.
+
+- 모든 객체는 `[[Prototype]]`이라는 내부 슬롯을 가진다. (내부 슬롯의 값은 프로토타입의 참조 혹은 null)
+- 객체 생성 방식에 따라 `[[Prototype]]`의 프로토타입이 결정된다.
+- 모든 프로토타입은 생성자 함수와 연결되어 있다.
+- `[[Prototype]]` 내부 슬롯에 직접 접근할 수 없지만, `__proto__`접근자 프로퍼티를 통해 자신의 프로토타입에 간접적으로 접근할 수 있다.
+- `constructor` 프로퍼티를 통해 생성자 함수에 접근할 수 있고, 생성자 함수는 자신의 prototype 프로퍼티를 통해 프로토타입에 접근할 수 있다.
+
+### `__proto__` 접근자 프로퍼티
+
+**모든 객체는 `__proto__` 접근자 프로퍼티를 통해 자신의 프로토타입, 즉 `[[Prototype]]` 내부 슬롯에 간접적으로 접근할 수 있다.**
+
+내부 슬롯과 내부 메서드는 직접적으로 접근하거나 호출할 수 있는 방법이 없다. 단 일부에 한하여 간접적으로 접근할 수 있는 수단을 제공한다. `__proto__` 역시 이러한 방법 중에 하나이며 다른 접근자 프로퍼티처럼 접근자 함수(`[[Get]]`, `[[Set]]`) 프로퍼티 어트리뷰트로 구성된 프로퍼티다. `__proto__`는 getter/setter 함수라 불리는 접근자 함수를 통해 `[[Prototype]]` 내부 슬롯의 값을 취득하거나 할당한다.
+
+- 프로토타입에 접근할 때 => getter가 사용됨
+- 새로운 프로토타입을 할당할 때 => setter가 사용됨
+
+```js
+const obj = {};
+const parent = { x: 1 };
+
+// getter
+obj.__proto__;
+
+// setter
+obj.__proto__ = parent;
+```
+
+`__proto__` 접근자 프로퍼티는 객체가 직접 소유하는 것이 아니라 `Object.prototype`의 프로퍼티이고, 모든 객체는 상속을 통해 사용할 수 있다.
+
+```js
+const person = { name: lee };
+
+console.log(person.hasOwnProperty("__proto__")); // false
+console.log(Object.getOwnPropertyDescriptor(Object.prototype, "__proto__"));
+// {get: f, enumerable: false, configurable: true}
+
+console.log({}.__proto__ === Object.prototype); // true
+```
+
+`[[Prototype]]` 내부 슬롯의 값에 접근하기 위해 접근자 프로퍼티를 사용하는 이유는 상호 참조에 의해 프로퍼티 체인이 생성되는 것을 방지하기 위해서다.
+
+```js
+const parent = {};
+const child = {};
+
+parent.__proto__ = child;
+child.__proto__ = parent; // Error
+```
+
+프로토타입 체인은 단방향 링크드 리스트로 구현되어야 한다. (검색 방향이 한쪽으로만 흘러가야 한다) 순환 참조를 하게되면 프로토타입 체인 종점이 존재하지 않아서 무한 루프에 빠진다.
+
+`__proto__` 접근자 프로퍼티는 ES5까지 ECMAScript 사양에 포함되지 않은 비표준이었다. 하지만 일부 브라우저에서 `__proto__`를 지원하기 때문에 호환성을 고려해 ES6에서 표준으로 채택했다. 하지만 코드 내에서 `__proto__` 접근자 프로퍼티를 사용하는 것은 권장하지 않는다. 모든 객체가 `__proto__` 접근자 프로퍼티를 사용할 수 있는 것은 아니기 때문이다.(`Object.prototype`을 상속받지 않는 객체를 생성할 수도 있기 때문)
+
+```js
+const obj = Object.create(null);
+console.log(obj.__proto__); // undefined
+```
+
+프로토타입 참조를 취득하고 싶은 경우에는 `__proto__` 대신 `Object.getPrototypeOf`를 사용하고 프로토타입을 교체하고 싶은 경우에는 `Object.setPrototypeOf` 메서드를 사용할 것을 권장한다.
