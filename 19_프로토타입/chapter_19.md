@@ -25,7 +25,7 @@
 - 자바스크립트는 프로토타입을 기반으로 상속을 구현하여 불필요한 중복을 제거한다. (기존에 작성한 코드를 재사용)
 - 코드의 재사용은 코드의 중복을 제거하고 개발 비용을 현저히 줄일 수 있는 잠재력이 있다.
 
-### 불필요한 중복 예시
+### ✏️ 불필요한 중복 예시
 
 ```js
 function Circle(radius) {
@@ -78,7 +78,7 @@ console.log(circle1.getArea === circle2.getArea); // true
 - `[[Prototype]]` 내부 슬롯에 직접 접근할 수 없지만, `__proto__`접근자 프로퍼티를 통해 자신의 프로토타입에 간접적으로 접근할 수 있다.
 - `constructor` 프로퍼티를 통해 생성자 함수에 접근할 수 있고, 생성자 함수는 자신의 prototype 프로퍼티를 통해 프로토타입에 접근할 수 있다.
 
-### `__proto__` 접근자 프로퍼티
+### ✏️ `__proto__` 접근자 프로퍼티
 
 **모든 객체는 `__proto__` 접근자 프로퍼티를 통해 자신의 프로토타입, 즉 `[[Prototype]]` 내부 슬롯에 간접적으로 접근할 수 있다.**
 
@@ -130,3 +130,83 @@ console.log(obj.__proto__); // undefined
 ```
 
 프로토타입 참조를 취득하고 싶은 경우에는 `__proto__` 대신 `Object.getPrototypeOf`를 사용하고 프로토타입을 교체하고 싶은 경우에는 `Object.setPrototypeOf` 메서드를 사용할 것을 권장한다.
+
+### ✏️ 함수 객체의 prototype 프로퍼티
+
+**함수 객체만이 소유하는 prototype 프로퍼티는 생성자 함수가 생성할 인스턴스의 프로토타입을 가리킨다.**
+
+```js
+// 함수 객체는 prototype 프로퍼티를 소유한다.
+(function () {}).hasOwnProperty("prototype"); // true
+
+// 일반 객체는 prototype 프로퍼티를 소유하지 않는다.
+({}).hasOwenProperty("prototype"); // false
+```
+
+생성자 함수로서 호출할 수 없는 함수(non-constructor)인 화살표 함수, ES6 메서드 축약 표현으로 정의한 메서드는 prototype 프로퍼티를 소유하지 않으며 프로토타입도 생성하지 않는다.
+
+생성자 함수로 호출하기 위해 정의하지 않는 일반 함수(함수 선언문, 함수 표현식)도 prototype 프로퍼티를 소유하지만 객체를 생성하지 않는 일반 함수의 prototype 프로퍼티는 의미가 없다.
+
+**모든 객체가 가지고 있는 `__proto__` 접근자 프로퍼티와 함수 객체만이 가지고 있는 `prototype` 프로퍼티는 동일한 프로토타입을 가리키지만 사용하는 주제가 다르다.**
+
+|    구분     |     소유      |       값        |  사용 주체  |                             사용 목적                              |
+| :---------: | :-----------: | :-------------: | :---------: | :----------------------------------------------------------------: |
+| `__proto__` |   모든 객체   | 프로토타입 참조 |  모든 객체  |      객체가 자신의 프로토타입에 접근 또는 교체하기 위해 사용       |
+| `prototype` | `constructor` | 프로토타입 참조 | 생성자 함수 | 생성자 함수가 자신이 생성할 객체의 프로토타입을 할당하기 위해 사용 |
+
+```js
+// 생성자 함수
+function Person(name) {
+  this.name = name;
+}
+
+const me = new Person("lee");
+
+// 둘은 동일한 프로토타입을 가진다.
+console.log(Person.prototype === me.__proto__); // true;
+```
+
+### ✏️ 프로토타입의 `constructor` 프로퍼티와 생성자 함수
+
+모든 프로토타입은 `constructor` 프로퍼티를 갖는다. 이 `constructor` 프로퍼티는 `prototype` 프로퍼티로 자신을 참조하고 있는 생성자 함수를 가리킨다. 이 연결은 생성자 함수가 생성될 때, 즉 함수 객체가 생성될 때 이뤄진다.
+
+```js
+function Person(name) {
+  this.name = name;
+}
+
+const me = new Person("lee");
+
+me.constructor === Person; // => true
+```
+
+## 📝 19.4 리터럴 표기법에 의해 생성된 객체의 생성자 함수와 프로토타입
+
+생성자 함수에 의해 생성된 인스턴스는 프로토타입의 `constructor` 프로퍼티에 의해 생성자 함수와 연결된다.
+
+```js
+// obj 객체를 생성한 생성자 함수는 Object다.
+const obj = new Object();
+console.log(obj.constructor === Object); // true
+
+// add 함수 객체를 생성한 생성자 함수는 Function이다.
+const add = new Function("a", "b", "return a + b");
+console.log(add.constructor === Function); // true
+
+// 생성자 함수
+function Person(name) {
+  this.name = name;
+}
+
+// me 객체를 생성한 함수는 Person이다.
+const me = new Person("lee");
+console.log(me.constructor === Person); // true
+```
+
+리터럴 표기법으로 생성한 객체도 프로토타입이 존재하지만 프로토타입의 `constructor` 프로퍼티가 가리키는 생성자 함수가 반드시 객체를 생성한 생성자 함수라고 단정할 수 없다.
+
+```js
+const obj = {};
+
+console.log(obj.constructor === Object); // true
+```
