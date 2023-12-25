@@ -276,3 +276,113 @@ console.log(Person2.prototype); // undefined
 - 생성되 프로토타입은 빌트인 생성자 함수의 `prototype` 프로퍼티에 바인딩된다.
 
 객체가 생성되기 이전에 생성자 함수와 프로토타입은 이미 객체화되어 존재한다. **이후 생성자 함수 또는 리터럴 표기법으로 객체를 생성하면 프로토타입은 생성된 객체의 `[[Prototype]]` 내부 슬롯에 할당된다.** 생성된 객체는 프로토타입을 상속받는다.
+
+## 📝 19.6 객체 생성 방식과 프로토타입의 결정
+
+**객체 생성 방법**
+
+- 객체 리터럴
+- `Object` 생성자 함수
+- 생성자 함수
+- `Object.create` 메서드
+- 클래스(ES6)
+
+생성 방식마다 세부적인 차이점은 존재하지만 추상 연산에 의해 생성된다는 공통점이 있다.
+
+**추상 연산**
+
+- 필수적으로 자신이 생성할 객체의 프로토타입을 인수로 전달 받는다.
+- 자신이 생성할 객체에 추가할 프로퍼티 목록을 옵션으로 전달할 수 있다.
+- 빈 객체를 생성한 후, 객체에 추가할 프로퍼티 목록이 인수로 전달된 경우 프로퍼티를 객체에 추가한다.
+- 인수로 전달받은 프로토타입을 자신이 생성한 객체의 [[Prototype]] 내부 슬롯에 할당하고 생성한 객체를 반환한다.
+
+프로토타입은 추상 연산에 전달되는 인수에 의해 결정된다. 인수는 객체가 생성되는 시점에 객체 생성 방식에 의해 결정된다.
+
+### ✏️ 객체 리터럴에 의해 생성된 객체의 프로토타입
+
+```js
+const obj = { x: 1 };
+
+console.log(obj.constructor === Object); // true
+console.log(obj.hasOwnProperty("x")); // true
+```
+
+자바스크립트 엔진은 객체 리터럴을 평가하여 객체를 생성할 때 추상연산을 호출한다. 이때 추상 연산에 전달되는 프로토타입은 `Object.prototype`이다.
+
+- `Object.prototype`을 상속받는다.
+- `Object.prototype`의 프로퍼티와 메서드를 사용할 수 있다.
+
+### ✏️ Object 생성자 함수에 의해 생성된 객체의 프로토타입
+
+```js
+const obj = new Object();
+obj.x = 1;
+
+console.log(obj.constructor === Object); // true
+console.log(obj.hasOwnProperty("x")); // true
+```
+
+`Object` 생성자 함수를 인수 없이 호출하면 빈 객체가 생성되고 추상 연산을 호출한다. 이때 추상 연산에 전달되는 프로토타입은 `Object.prototype`이다.
+
+- 객체 리터럴과의 차이점은 프로퍼티를 추가하는 방식에 있다.
+- 객체 리터럴은 리터럴 내부에 프로퍼티를 추가하지만 `Object` 생성자 함수는 빈 객체를 생성한 이후 프로퍼티를 추가한다.
+
+### ✏️ 생성자 함수에 의해 생성된 객체의 프로토타입
+
+```js
+function Person(name) {
+  this.name = name;
+}
+
+Person.prototype.sayHello = function () {
+  console.log(`Hi My name is ${this.name}`);
+};
+
+const me = new Person("lee");
+const you = new Person("kim");
+
+me.sayHello(); // Hi My name is lee
+you.sayHello(); // Hi My name is kim
+```
+
+new 연산자와 함께 생성자 함수를 호출하여 인스턴스를 생성하면 추상 연산이 호출된다. 이때 추상 연산에 전달되는 프로토타입은 생성자 함수의 `prototype` 프로퍼티에 바인딩되어 있는 객체다.
+
+- 사용자 정의 생성자 함수와 더불에 생성된 프로토타입의 프로퍼티는 `constructor`뿐이다.
+- 사용자 정의 생성자 함수의 프로토타입에 프로퍼티를 추가/삭제할 수 있다.
+- 추가/삭제된 프로퍼티는 프로토타입 체인에 즉각 반영된다.
+- 사용자 정의 생성자 함수의 프로토타입의 프로토타입은 `Object.prototype`이다.
+
+## 📝 19.7 프로토타입 체인
+
+```js
+function Person(name) {
+  this.name = name;
+}
+
+Person.prototype.sayHello = function () {
+  console.log(`Hi My name is ${this.name}`);
+};
+
+const me = new Person("lee");
+
+console.log(me.hasOwnProperty("name")); // true
+Object.getPrototypeOf(me) === Person.prototype; // true
+Object.getPrototypeOf(Person.prototype) === Object.prototype; // true
+```
+
+예제를 확인하면 `me` 객체가 `Object.prototype`의 `hasOwnProperty()` 메서드를 사용할 수 있다고 나온다. 그 이유는 `me` 객체가 `Person.prototype` 뿐만 아니라 `Object.prototype`도 상속받았기 때문이다.
+
+**자바스크립트는 객체의 프로퍼티(메서드 포함)에 접근하려고 할 때 해당 객체에 접근하려는 프로퍼티가 없다면 `[[Prototype]]` 내부 슬롯의 참조를 따라 자신의 부모 역할을 하는 프로토타입의 프로퍼티를 순차적으로 검색한다. 이를 프로토타입 체인이라 한다. 프로토타입 체인은 자바스크립트가 객체지향 프로그래밍의 상속을 구현하는 메커니즘이다.**
+
+**자바스크립트 엔진의 메서드 검색 순서**
+
+1. 메서드를 호출한 객체에 해당 메서드가 존재하는지 검색한다. 메서드가 존재하지 않는다면 프로토타입 체인을 따라 `[[Prototype]]` 내부 슬롯에 바인딩되어 있는 프로토타입으로 이동하여 메서드를 검색한다. (`me` 객체)
+2. 상위 프로토타입에도 메서드가 존재하지 않는다면 프로토타입 체인을 따라 `[[Prototype]]` 내부 슬롯에 바인딩되어 있는 프로토타입으로 이동하여 메서드를 검색한다. (`Person.prototype`)
+3. `Object.prototype`에 메서드가 존재하면 메서드를 호출한다. (메서드의 `this`에는 `me` 객체가 바인딩된다.)
+4. 프로토타입 체인의 종점에도 메서드가 존재하지 않다면 `undefined`를 반환한다. (에러는 발생하지 않는다)
+
+- `Object.prototype`을 프로토타입 체인의 종점이라 한다.
+- `Object.prototype`의 프로토타입(`[[Prototype]]`)의 내부 슬롯의 값은 `null`이다.
+- 프로토타입 체인은 상속과 프로퍼티 검색을 위한 메커니즘
+- 스코프 체인은 식별자 검색을 위한 메커니즘
+- 스코프 체인과 프로토타입 체인은 별도로 동작하지 않고 서로 협력하여 식별자와 프로퍼티를 검색하는데 사용된다.
