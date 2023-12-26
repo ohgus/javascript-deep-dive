@@ -386,3 +386,61 @@ Object.getPrototypeOf(Person.prototype) === Object.prototype; // true
 - 프로토타입 체인은 상속과 프로퍼티 검색을 위한 메커니즘
 - 스코프 체인은 식별자 검색을 위한 메커니즘
 - 스코프 체인과 프로토타입 체인은 별도로 동작하지 않고 서로 협력하여 식별자와 프로퍼티를 검색하는데 사용된다.
+
+## 📝 19.8 오버라이딩과 프로퍼티 섀도잉
+
+```js
+const Person = (function () {
+  // 생성자 함수
+  fucntion Person(name) {
+    this.name = name;
+  }
+
+  // 프로토타입 메서드
+  Person.prototype.sayHello = function () {
+    console.log(`hi my name is ${this.name}`);
+  }
+
+  // 생성자 함수를 반환
+  return Person;
+}());
+
+const me = new Person("lee");
+
+// 인스턴스 메서드
+me.sayHello = function () {
+  console.log(`hey my name is ${this.name}`);
+}
+
+// 인스턴스 메서드가 호출된다. 프로토타입 메서드는 인스턴스 메서드에 의해 가려진다.
+me.sayHello(); // hey my name is lee
+
+// 인스턴스 메서드를 삭제한다.
+delete me.sayHello;
+
+// 인스턴스 메서드가 없으므로 프로토타입 메서드가 호출된다.
+me.sayHello(); // hi my name is lee
+```
+
+프로토타입이 소유한 프로퍼티(메서드 포함)를 프로토타입 프로퍼티, 인스턴스가 소유한 프로퍼티를 인스턴스 프로퍼티라고 한다.
+
+- 프로토타입 프로퍼티와 같은 이름의 프로퍼티를 인스턴스에 추가하면 덮어쓰는 것이 아니라 인스턴스 프로퍼티로 추가한다.
+- 인스턴스 메서드 sayHello는 프로토타입 메서드 sayHello를 오버라이딩했고 프로토타입 메서드 sayHello는 가려진다.
+- 상속 관계에 의해 프로퍼티가 가려지는 현상을 **프로퍼티 섀도잉**이라 한다.
+- 메서드를 삭제할 때 인스턴스 메서드가 삭제된다.
+- 하위 객체를 통해 프로토타입 프로퍼티를 변경, 삭제하는 것은 불가능하다.
+
+```
+오버라이딩
+
+상위 클래스가 가지고 있는 메서드를 하위 클래스가 재정의하여 사용하는 방식
+
+오버로딩
+
+함수의 이름은 동일하지만 매개변수의 타입 또는 개수가 다른 메서드를 구현하고 매개변수에 의해 메서드를 구별하여 호출하는 방식이다.
+자바스크립트는 오버로딩을 지원하지 않지만 arguments 객체를 사용하여 구현할 수는 있다.
+```
+
+```js
+
+```
