@@ -160,3 +160,18 @@ outer: for (let i = 0; i < 2; i++) {
   }
 }
 ```
+
+## 📝 8.5 continue 문
+
+반복문의 코드 블록 실행을 현 지점에서 중단하고 반복문의 증감식으로 이동시킨다. 반복문을 탈출하지는 않는다.
+
+```js
+const string = "hello";
+const search = "l";
+let count = 0;
+
+for (let i = 0; i < string.length; i++) {
+  if (string[i] !== search) continue;
+  count++;
+}
+```
