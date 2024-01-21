@@ -108,3 +108,50 @@ person.last - name;
 JS엔진은 `person.last`를 먼저 평가한다. 하지만 객체 내부에 `last`라는 프로퍼티 키가 없기 때문에 `undefined`로 평가된다. (`person.last-name === undefined - name`) 여기서 `name`은 프로퍼티 키가 아닌 식벽자로 인식된다. 이때 브라우저 환경에는 name이라는 전역 변수가 존재하는데 기본 값은 빈 문자열이다. 따라서 `undefined - "" === NaN`이 된다.
 
 Node.js 환경에서는 `name`이라는 변수가 어디에도 존재하지 않기 때문에 `ReferenceError`가 발생한다.
+
+## 📝 10.6 프로퍼티 값 갱신
+
+이미 존재하는 프로퍼티에 값을 할당하면 프로퍼티 값이 갱신된다.
+
+```js
+const person = {
+  name: "lee",
+};
+
+person.name = "oh";
+
+console.log(person.name); // "oh"
+```
+
+## 📝 10.7 프로퍼티 동적 생성
+
+존재하지 않는 프로퍼티에 값을 할당하면 프로퍼티가 동적으로 생성되고 값이 할당된다.
+
+```js
+const pet = {
+  species: "강아지",
+};
+
+pet.kind = "진돗개";
+
+console.log(pet); // {species: "강아지", kind: "진돗개"}
+```
+
+## 📝 10.8 프로퍼티 삭제
+
+delete 연산자를 이용해 프로퍼티를 삭제할 수 있다.
+
+- delete의 피연산자는 프로퍼티 값에 접근할 수 있는 표현식이어야 한다.
+- 존재하지 않는 프로퍼티를 삭제하면 에러 없이 무시된다.
+
+```js
+const person = {
+  name: "oh",
+  age: 28,
+};
+
+delete person.age;
+delete person.male: // 무시된다.
+
+console.log(person); // {name: "oh"}
+```
