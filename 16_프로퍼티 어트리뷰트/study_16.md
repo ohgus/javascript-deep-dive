@@ -149,3 +149,48 @@ Object.getOwnPropertyDescriptor(Object.prototype, '__proto__');
 Object.getOwnPropertyDescriptor(function () {}, 'prototype');
 // {value: {...}, writable: true, enumerable: false, configurable: false}
 ```
+
+## 📝 16.4 프로퍼티 정의
+
+새로운 프로퍼티를 정의하면서 어트리뷰트를 명시적으로 정의하거나, 기존 프로퍼티의 어트리뷰트를 재정의 하는 것을 프로퍼티 정의라고 한다.
+
+프로퍼티 정의는 `Object.definedProperty` 메서드를 사용하며 누락된 프로퍼티의 값은 `undefined`, `false`가 기본값이다.
+
+- `value`, `get`, `set` -> `undefined`
+- `writable`, `enumerable`, `configurable` -> `false`
+- 한번에 하나의 프로퍼티만 정의할 수 있지만 `Object.definedProperties` 메서드를 사용하면 여러개의 프로퍼티를 정의할 수 있다.
+- `writable`의 값이 `false`인 경우 `value`의 값을 변경할 수 없는데 만약 값을 변경할 경우 에러는 발생하지 않고 무시된다.
+- `enumerable`의 값이 `false`인 경우 `for...in` 문이나 `Object.keys` 등으로 열거할 수 없다.
+- `configurable`의 값이 `false`인 경우 프로퍼티의 값을 삭제하거나 재정의할 수 없다. 삭제의 경우 에러가 발생하지 않고 무시되나 재정의를 하면 `TypeError`가 발생한다.
+
+```js
+const dog = {};
+
+Object.definedProperty(dog, 'age', {
+  value: 5,
+  writable: true,
+  enumerable: true,
+  configurable: true,
+});
+
+Object.definedProperty(dog, 'color', {
+  value: 'ivory',
+});
+
+const descriptor = Object.getOwnPropertyDescriptor(dog, 'color');
+console.log(descriptor);
+// {value: 'ivory', writable: false, enumerable: false, configurable: false}
+
+// 한번에 여러개의 프로퍼티 정의
+Object.definedProperties(dog, {
+  age: {
+    value: 5,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  },
+  color: {
+    value: 'ivory',
+  },
+});
+```
