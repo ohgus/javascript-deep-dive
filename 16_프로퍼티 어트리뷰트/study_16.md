@@ -194,3 +194,107 @@ Object.definedProperties(dog, {
   },
 });
 ```
+
+## 📝 16.5 객체 변경 방지
+
+|      구분      |           메서드           | 프로퍼티 추가 | 프로퍼티 삭제 | 프로퍼티 값 읽기 | 프로퍼티 값 쓰기 | 프로퍼티 어트리뷰트 재정의 |
+| :------------: | :------------------------: | :-----------: | :-----------: | :--------------: | :--------------: | :------------------------: |
+| 객체 확장 금지 | `Object.preventExtensions` |       X       |       O       |        O         |        O         |             O              |
+|   객체 밀봉    |       `Object.seal`        |       X       |       X       |        O         |        O         |             X              |
+|   객체 동결    |      `Object.freeze`       |       X       |       X       |        O         |        X         |             X              |
+
+### ✏️ 16.5.1 객체 확장 금지 `Object.preventExtensions`
+
+확장이 금지된 객체는 프로퍼티 추가가 금지된다. `Object.isExtensible` 메서드로 객체의 확장 가능 여부를 확인할 수 있다.
+
+```js
+const person = { name: 'oh' };
+
+console.log(Object.isExtensible(person)); // true
+
+Object.preventExtensions(person);
+
+console.log(Object.isExtensible(person)); // false
+
+person.age = 28; // 무시. strict mode에서는 에러
+
+delete person.name;
+console.log(person); // {}
+
+// 프로퍼티 정의에 의한 프로퍼티 추가도 금지된다.
+Object.defineProperty(person, 'age', { value: 28 });
+// TypeError
+```
+
+### ✏️ 16.5.2 객체 밀봉 `Object.seal`
+
+밀봉된 객체는 읽기와 쓰기만 가능하다. `Object.isSealed` 메서드로 객체의 밀봉 여부를 확인할 수 있다.
+
+- 밀봉된 객체의 `configurable`은 `false`다.
+- 프로퍼티 추가, 삭제, 어트리뷰트 재정의는 금지되지만 프로퍼티 값의 갱신은 가능하다.
+- 추가, 삭제의 경우 strict mode에서만 에러가 발생하고 어트리뷰트 재정의는 무조건 에러가 발생한다.
+
+```js
+const person = { name: 'oh' };
+
+console.log(Object.isSealed(person)); // false
+
+Object.seal(person);
+
+console.log(Object.isSealed(person)); // true
+
+person.name = 'lee';
+
+console.log(person); // { name: 'lee' }
+```
+
+### ✏️ 16.5.3 객체 동결 `Object.freeze`
+
+동결된 객체는 읽기만 가능하다. `Object.isFrozen` 메서드로 객체의 동결 여부를 확인할 수 있다.
+
+- 동결된 객체의 `writable`, `configurable`은 `false`다.
+- 프로퍼티 추가, 삭제, 값의 갱신, 어트리뷰트 재정의가 금지된다.
+- 추가, 삭제, 값의 갱신은 strict mode에서만 에러가 발생하고 어트리뷰트 재정의는 무조건 에러가 발생한다.
+
+```js
+const person = { name: 'oh' };
+
+console.log(Object.isFrozen(person)); // false
+
+Object.freeze(person);
+
+console.log(Object.isFrozen(person)); // true
+```
+
+### ✏️ 16.5.4 불변 객체
+
+`Object.freeze` 메서드로는 중첩 객체까지 동결하지 못한다. 중첩 객체까지 동결하기 위해서는 모든 프로퍼티에 대해 재귀적으로 `Object.freeze`를 호출해야 한다.
+
+```js
+const person = {
+  name: 'oh',
+  address: { city: 'bundang' },
+};
+
+Object.freeze(person);
+
+console.log(Object.isFrozen(person)); // true
+console.log(Object.isFrozen(person.address)); // false
+
+person.address.city = 'seoul';
+
+function deepFreeze(target) {
+  // 동결되지 않은 객체만 동결한다.
+  if (target && typeOf target === 'object' && !Object.isFrozen(target)) {
+    Object.freeze(target);
+
+    Object.keys(target).forEach(key => deepFreeze(target[key]));
+  }
+  return target;
+}
+
+deepFreeze(person);
+
+console.log(Object.isFrozen(person)); // true
+console.log(Object.isFrozen(person.address)); // true
+```
