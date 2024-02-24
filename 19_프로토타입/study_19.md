@@ -34,3 +34,35 @@ const person = {
   },
 };
 ```
+
+## 📝 19.2 상속과 프로토타입
+
+상속은 객체지향 프로그래밍의 핵심 개념으로, 어떤 객체의 프로퍼티 또는 메서드를 다른 객체가 상속받아 그대로 사용할 수 있는 것을 말한다. JS는 상속을 프로토타입을 기반으로 상속을 구현하여 기존의 코드를 재사용할 수 있어 붎필요한 중복을 줄여 개발 비용을 줄일 수 있다.
+
+생성자 함수를 통해서 동일한 메서드를 갖는 다른 객체를 만들 때 코드를 별개로 작성하는 수고를 줄일 수 있었다. 하지만 인스턴스가 생성될 때마다 동일한 메서드가 중복으로 생성되어 불필요한 메모리를 낭비하는 문제가 있다. 이를 상속을 통해 해결할 수 있다.
+
+```js
+function Person(name) {
+  this.name = name;
+  this.sayHi() {
+    console.log(`Hi my name is ${this.name}`);
+  }
+}
+
+const person1 = new Person('oh');
+const person2 = new Person('kim');
+
+// 상속을 활용
+function Person(name) {
+  this.name = name;
+}
+
+Person.prototype.sayHi = function() {
+  console.log(`Hi my name is ${this.name}`);
+}
+
+// 각각의 인스턴스가 별개의 프로퍼티를 갖지만 동일한 메서드를 부모의 프로토타입으로부터 상속받는다.
+// 각각의 인스턴스가 별개의 메서드를 중복으로 생성하지 않고 하나의 메서드를 공유한다.
+const person1 = new Person('oh');
+const person2 = new Person('kim');
+```
