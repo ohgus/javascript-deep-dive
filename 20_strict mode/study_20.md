@@ -33,3 +33,36 @@ foo();
 ```
 
 ![alt text](public/image1.png)
+
+## 📝 20.3 전역에 strict mode를 적용하는 것은 피하자
+
+전역에 적용한 `strict mode`는 스크립트 단위로 적용된다.
+
+```html
+<!DOCTYPE html>
+<html>
+  <body>
+    <script>
+      'use strict';
+      x = 10; // ReferenceError
+    </script>
+    <script>
+      y = 10; // 에러가 발생하지 않는다.
+    </script>
+  </body>
+</html>
+```
+
+- `strict mode`는 스크립트 단위로 적용되기 때문에 다른 스크립트에 영향을 주지 않는다.
+- `strict mode`와 `non-strict mode`를 혼용해서 사용하는 것은 오류를 발생시킬 수 있다.
+- 서드파티 라이브러리를 사용하는 경우 `non-strict mode`인 경우가 있어 전역 `strict mode`를 적용하는 것은 바람직하지 않다.
+
+  - 이러한 경우 즉시 실행 함수로 스크립트 전체를 감싸 스코프를 구분하고 즉시 실행 함수 선두에 `strict mode`를 적용한다.
+
+  ```js
+  (function () {
+    'use strict';
+
+    /// Do something...
+  })();
+  ```
