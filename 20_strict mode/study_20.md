@@ -66,3 +66,23 @@ foo();
     /// Do something...
   })();
   ```
+
+## 📝 20.4 함수 단위로 strict mode를 적용하는 것도 피하자
+
+함수 단위로 `strict mode`를 적용할 수 있지만 어떤 함수는 적용하고 어떤 함수는 적용하지 않는 것은 바람직하지 않으며 모든 함수에 일일이 적용하는 것은 번거로운 일이다.  
+`strict mode`가 적용된 함수가 참조할 외부의 컨텍스트에 `strict mode`를 적용하지 않는다면 문제가 발생할 수 있다.
+
+```js
+(function () {
+  // non-strict mode
+  var let = 10; // no error
+
+  function foo() {
+    'use strict';
+
+    let = 20; // SyntaxError
+  }
+
+  foo();
+})();
+```
